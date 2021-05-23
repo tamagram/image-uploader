@@ -20,11 +20,11 @@ const Home: React.FC = () => {
     params.append('imageFile', image);
     axios
       .post(
-        process.env.BACKEND_URL as string,
+        'http://localhost:5000/file',
         params,
         {
           headers: {
-            'content-type': 'multipart/data'
+            'Content-Type': 'multipart/data',
           }
         },
       )
