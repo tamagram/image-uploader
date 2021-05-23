@@ -1,11 +1,13 @@
-version: '3'
+version: "3"
 
 services:
-    api:
-        build: ./backend
-        command: go run main.go
-        container_name: (api)image-uploader
-        ports:
-            - "1323:1323"
-        volumes: 
-            - ./backend:/api # バインド
+  api:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    ports:
+      - "1323:1323"
+    volumes:
+      - ./backend:/api # バインド
+    tty: true
+    stdin_open: true
