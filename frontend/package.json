@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "fmt": "prettier --write ./pages/*.tsx",
-    "lint:ts": "eslint ./pages/ --ext .tsx",
+    "fmt": "prettier --write ./{pages,components}/*.tsx",
+    "lint:ts": "eslint ./pages/ ./components/ --ext .tsx",
     "prepare": "cd .. && husky install ./frontend/.husky"
   },
   "dependencies": {
