@@ -13,35 +13,43 @@ func sampleHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		src_file, reader, err := r.FormFile("imageFile")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		defer src_file.Close()
-
-		// Open and copy the file
-		dst_file, err := os.OpenFile("./path_to_save_image/"+reader.Filename, os.O_RDONLY|os.O_CREATE, 0666)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		defer dst_file.Close()
-		io.Copy(dst_file, src_file)
-
-		// response
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-		w.Header().Set("Access-Control-Allow-Header", "Content-Type")
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte("success"))
-		w.WriteHeader(200)
-	}
-	// response
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("error"))
-	w.WriteHeader(400)
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+
+	err := r.ParseMultipartForm(32 << 20)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	m := r.MultipartForm
+	for _, fileHeaders := range m.File {
+		for _, header := range fileHeaders {
+			src_file, err := header.Open()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			defer src_file.Close()
+
+			// Open and copy the file
+			dst_file, err := os.OpenFile("../path_to_save_image/"+header.Filename, os.O_RDONLY|os.O_CREATE, 0666)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			defer dst_file.Close()
+			io.Copy(dst_file, src_file)
+		}
+	}
+
+	// src_file, reader, err := r.FormFile("file")
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+	// defer src_file.Close()
+
+	// response
+	w.Write([]byte("success"))
+	w.WriteHeader(200)
 }
 
 func main() {

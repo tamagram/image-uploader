@@ -24,7 +24,7 @@ const Home: React.FC = () => {
         params,
         {
           headers: {
-            'Content-Type': 'multipart/data',
+            'Content-Type': 'multipart/form-data',
           }
         },
       )
@@ -34,7 +34,7 @@ const Home: React.FC = () => {
       })
       .catch((reason) => {
         setMessage('送信失敗');
-        console.log(reason);
+        console.log(reason.response);
       });
   };
 
