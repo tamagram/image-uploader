@@ -49,7 +49,6 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 
 	// response
 	w.Write([]byte("success"))
-	w.WriteHeader(200)
 }
 
 func main() {
