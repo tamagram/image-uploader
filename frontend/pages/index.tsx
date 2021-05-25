@@ -6,18 +6,27 @@ import axios from 'axios';
 
 const Home: React.FC = () => {
   const [image, setImage] = useState('');
+  const [imageFile, setImageFile] = useState<File>()
   const [message, setMessage] = useState('画像を選択してください')
 
   const fileSelect = (event: ChangeEvent<any>) => {
     const imageFile = event.target.files[0];
+    console.log(imageFile);
+    setImageFile(imageFile);
+
     const imageUrl = URL.createObjectURL(imageFile);
+    console.log(imageUrl);
     setImage(imageUrl);
+
     setMessage('');
   };
   const fileSend = () => {
     setMessage('送信中...');
     const params = new FormData();
-    params.append('imageFile', image);
+    if (imageFile == undefined) {
+      return
+    }
+    params.append('image', imageFile);
     axios
       .post(
         'http://localhost:5000/file',
@@ -43,7 +52,7 @@ const Home: React.FC = () => {
       <main className={styles.main}>
         <h1>Image Uploader</h1>
         <form method='post' encType='multipart/form-data'>
-          <input type='file' accept='image/*' onChange={fileSelect}></input>
+          <input type='file' name='image' accept='image/*' onChange={fileSelect}></input>
           <input type='button' value='send' onClick={fileSend}></input>
         </form>
         {message}
