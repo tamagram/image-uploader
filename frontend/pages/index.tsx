@@ -3,13 +3,16 @@ import styles from '../styles/Home.module.css';
 import Image from 'next/image'
 import { ChangeEvent, useState } from 'react';
 import axios from 'axios';
+import { GetServerSideProps } from 'next';
+import Gallery from '../components/gallery';
+
 
 const Home: React.FC = () => {
-  const [image, setImage] = useState('');
+  const [imageName, setImage] = useState('');
   const [imageFile, setImageFile] = useState<File>()
   const [message, setMessage] = useState('画像を選択してください')
 
-  const fileSelect = (event: ChangeEvent<any>) => {
+  const imageSelect = (event: ChangeEvent<any>) => {
     const imageFile = event.target.files[0];
     console.log(imageFile);
     setImageFile(imageFile);
@@ -20,7 +23,8 @@ const Home: React.FC = () => {
 
     setMessage('');
   };
-  const fileSend = () => {
+
+  const imageSend = () => {
     setMessage('送信中...');
     const params = new FormData();
     if (imageFile == undefined) {
@@ -46,17 +50,17 @@ const Home: React.FC = () => {
         console.log(reason.response);
       });
   };
-
   return (
     <Layout title="Image Uploader" description="画像の共有ができます">
       <main className={styles.main}>
         <h1>Image Uploader</h1>
         <form method='post' encType='multipart/form-data'>
-          <input type='file' name='image' accept='image/*' onChange={fileSelect}></input>
-          <input type='button' value='send' onClick={fileSend}></input>
+          <input type='file' name='image' accept='image/*' onChange={imageSelect}></input>
+          <input type='button' value='send' onClick={imageSend}></input>
         </form>
         {message}
-        <img className={styles.image} src={image}></img>
+        <img className={styles.image} src={imageName}></img>
+        <Gallery />
       </main>
       <footer className={styles.footer}>
         <a
@@ -74,3 +78,10 @@ const Home: React.FC = () => {
   );
 };
 export default Home;
+
+// imagefetch
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  return {
+    props: {},
+  }
+};
