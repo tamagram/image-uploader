@@ -13,7 +13,7 @@ func SampleHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-func ImageHandler(w http.ResponseWriter, r *http.Request) {
+func ImageReceiveHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	if r.Method == "POST" {
@@ -28,7 +28,8 @@ func ImageHandler(w http.ResponseWriter, r *http.Request) {
 		defer src_file.Close()
 
 		log.Print("dst_file open | create")
-		dst_file, err := os.OpenFile("./images/"+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+		dir, _ := os.Getwd()
+		dst_file, err := os.OpenFile(dir+"/images/"+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
 			log.Print("failed")
 			http.Error(w, err.Error(), http.StatusInternalServerError)

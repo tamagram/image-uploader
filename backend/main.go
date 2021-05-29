@@ -9,7 +9,7 @@ import (
 
 func main() {
 	log.Print("API Open")
-	http.HandleFunc("/file", api.ImageHandler)
+	http.HandleFunc("/file", api.ImageReceiveHandler)
 	http.HandleFunc("/sample", api.SampleHandler)
 	http.ListenAndServe(":5000", nil)
 }
