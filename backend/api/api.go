@@ -2,6 +2,7 @@ package api
 
 import (
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -48,4 +49,36 @@ func ImageReceiveHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		log.Print("successfull")
 	}
+}
+
+func ImageSendHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
+
+	dir, _ := os.Getwd()
+
+	// Get all file names inside a directory
+	log.Print("read filenames")
+	files, err := ioutil.ReadFile(dir + "images")
+	if err != nil {
+		log.Print("failed")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, file := range files {
+		log.Print(file)
+	}
+	// // Get all image data from a file name
+	// var images []image.Image
+	// log.Print("get all imagedata")
+	// for _, file := range files {
+	// 	f, err := os.Open(dir + "/" + string(file))
+	// 	if err != nil{
+	// 		log.Print("failed")
+	// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	}
+	// 	defer f.Close()
+	// 	image, _, err := image.Decode(f)
+	// }
 }
