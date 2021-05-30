@@ -4,8 +4,10 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 func SampleHandler(w http.ResponseWriter, r *http.Request) {
@@ -59,16 +61,40 @@ func ImageSendHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get all file names inside a directory
 	log.Print("read filenames")
-	files, err := ioutil.ReadFile(dir + "images")
+	files, err := ioutil.ReadDir(dir + "/images")
 	if err != nil {
 		log.Print("failed")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	for _, file := range files {
-		log.Print(file)
+	log.Println("open imagefile")
+	f, err := os.Open(dir + "/images/" + files[0].Name())
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+	defer f.Close()
+
+	log.Println("create formfile")
+	writer := multipart.NewWriter(w)
+	part, err := writer.CreateFormFile("file", filepath.Base(f.Name()))
+	if err != nil{
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	io.Copy(part, f)
+	writer.Close()
+
+	w.Header().Add("Content-Type", writer.FormDataContentType())
+	log.Println("successfull")
+
+	// for _, file := range files {
+	// 	log.Print(file.Name())
+	// }
+
 	// // Get all image data from a file name
 	// var images []image.Image
 	// log.Print("get all imagedata")
