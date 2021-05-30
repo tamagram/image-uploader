@@ -3,8 +3,6 @@ import styles from '../styles/Home.module.css';
 import Image from 'next/image'
 import { ChangeEvent, useState } from 'react';
 import axios from 'axios';
-import { GetServerSideProps } from 'next';
-import Gallery from '../components/gallery';
 
 
 const Home: React.FC = () => {
@@ -60,7 +58,6 @@ const Home: React.FC = () => {
         </form>
         {message}
         <img className={styles.image} src={imageName}></img>
-        <Gallery />
       </main>
       <footer className={styles.footer}>
         <a
@@ -77,11 +74,6 @@ const Home: React.FC = () => {
     </Layout>
   );
 };
+
 export default Home;
 
-// imagefetch
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  return {
-    props: {},
-  }
-};
