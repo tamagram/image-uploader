@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"log"
@@ -53,7 +54,8 @@ func ImageReceiveHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type Image struct {
-	name, data string
+	Name string `json:"name"`
+	Data string `json:"data"`
 }
 
 func ImageSendHandler(w http.ResponseWriter, r *http.Request) {
@@ -96,6 +98,7 @@ func ImageSendHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("generate json")
 	var imgJson []Image
+	var mImgJson []byte
 	for _, file := range files {
 		f, err := os.Open(dir + "/images/" + file.Name())
 		if err != nil {
@@ -107,11 +110,20 @@ func ImageSendHandler(w http.ResponseWriter, r *http.Request) {
 
 		binary, _ := ioutil.ReadAll(f)
 		imgJson = append(imgJson, Image{
-			file.Name(),
-			base64.StdEncoding.EncodeToString(binary),
+			Name: file.Name(),
+			Data: base64.StdEncoding.EncodeToString(binary),
 		})
 	}
 
 	log.Println("marshal")
+	mImgJson, err = json.Marshal(imgJson)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(mImgJson)
+
+	log.Println("successfull")
 }
