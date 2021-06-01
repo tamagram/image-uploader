@@ -1,13 +1,12 @@
 package api
 
 import (
+	"encoding/base64"
 	"io"
 	"io/ioutil"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"os"
-	"path/filepath"
 )
 
 func SampleHandler(w http.ResponseWriter, r *http.Request) {
@@ -53,6 +52,10 @@ func ImageReceiveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type Image struct {
+	name, data string
+}
+
 func ImageSendHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 	w.Header().Set("Access-Control-Allow-Methods", "GET")
@@ -77,34 +80,38 @@ func ImageSendHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer f.Close()
 
-	log.Println("create formfile")
-	writer := multipart.NewWriter(w)
-	part, err := writer.CreateFormFile("file", filepath.Base(f.Name()))
-	if err != nil{
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	// log.Println("create formfile")
+	// writer := multipart.NewWriter(w)
+	// part, err := writer.CreateFormFile("file", filepath.Base(f.Name()))
+	// if err != nil{
+	// 	log.Println(err.Error())
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+	// io.Copy(part, f)
+	// writer.Close()
+
+	// w.Header().Add("Content-Type", writer.FormDataContentType())
+	// log.Println("successfull")
+
+	log.Println("generate json")
+	var imgJson []Image
+	for _, file := range files {
+		f, err := os.Open(dir + "/images/" + file.Name())
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer f.Close()
+
+		binary, _ := ioutil.ReadAll(f)
+		imgJson = append(imgJson, Image{
+			file.Name(),
+			base64.StdEncoding.EncodeToString(binary),
+		})
 	}
-	io.Copy(part, f)
-	writer.Close()
 
-	w.Header().Add("Content-Type", writer.FormDataContentType())
-	log.Println("successfull")
+	log.Println("marshal")
 
-	// for _, file := range files {
-	// 	log.Print(file.Name())
-	// }
-
-	// // Get all image data from a file name
-	// var images []image.Image
-	// log.Print("get all imagedata")
-	// for _, file := range files {
-	// 	f, err := os.Open(dir + "/" + string(file))
-	// 	if err != nil{
-	// 		log.Print("failed")
-	// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	}
-	// 	defer f.Close()
-	// 	image, _, err := image.Decode(f)
-	// }
 }
