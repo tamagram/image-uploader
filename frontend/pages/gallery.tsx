@@ -1,26 +1,44 @@
-import { GetServerSideProps } from "next";
-import { imageFetch } from "../lib/api";
+import axios from "axios";
+import React, { useState } from "react";
+import useSWR from "swr";
+import Layout from "../components/layout";
 
-type FetchImage = {
-  result: any
+type Image = {
+  name: string
+  data: string
 }
 
-const Gallery: React.FC<FetchImage> = ({ result }) => {
-  
-  console.log(new FormData(result))
+const axiosFetcher = async () => {
+  const result = await axios.get<Image[]>(
+    'http://localhost:5000/images'
+  )
+  return result.data
+}
+
+const Gallery: React.FC = () => {
+  const { data: images, error } = useSWR('imagesFetch', axiosFetcher)
+  if (error) return <div>failed to load</div>
+  if (!images) {
+    return <div>loading...</div>
+  }
   return (
-    <div>
-      <h1>Gallery</h1>
-      {/* <img src={galleryImage}></img> */}
-    </div>
+    <Layout title="Gallery" description="画像の一覧">
+      <div>
+        <h2>Gallery</h2>
+        <ul>
+          {images &&
+            images.map((image, index) => {
+              return (
+                <li key={index}>
+                  <p>{image.name}</p>
+                  <img src={"data:image/*;base64," + image.data}></img>
+                </li>
+              )
+            })
+          }
+        </ul>
+      </div>
+    </Layout>
   )
 };
 export default Gallery
-
-// imagefetch
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const result = await imageFetch()
-  return {
-    props: { result },
-  }
-};
